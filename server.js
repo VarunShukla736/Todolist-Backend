@@ -1,9 +1,11 @@
-require('dotenv').config(); // MUST be at top
-
-const express = require('express');
-const connectDB = require('./config/db');
-const todoRoutes = require('./routes/todoRoutes');
-const logger = require('./middleware/logger');
+import 'dotenv/config'; // MUST be at top
+import express from 'express';
+import connectDB from "./config/db.js";
+import todoRoutes from './routes/todoRoutes.js';
+import logger from './middleware/logger.js';
+import swaggerSpec from './config/swagger.js';
+import swaggerUi from 'swagger-ui-express';
+import authRoutes from './routes/authRoutes.js';
 
 const app = express();
 
@@ -11,10 +13,12 @@ const app = express();
 connectDB();
 
 // Middleware
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(express.json()); // body parser
-// app.use(logger); // custom middleware
+app.use(logger); // custom middleware
 
 // Routes
+app.use("/api/auth", authRoutes);
 app.use('/api/todos', todoRoutes);
 
 // Server

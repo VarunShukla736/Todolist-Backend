@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const todoSchema = new mongoose.Schema(
   {
@@ -14,4 +15,6 @@ const todoSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Todo', todoSchema);
+const Todo = mongoose.model('Todo', todoSchema);
+
+export default Todo;

@@ -1,4 +1,5 @@
-const Todo = require('../models/Todo');
+// const Todo = require('../models/Todo');
+import Todo from "../models/Todo.js"
 
 // GET all todos
 const getTodos = async (req, res) => {
@@ -8,13 +9,18 @@ const getTodos = async (req, res) => {
 
 // GET single
 const getTodoById = async (req, res) => {
-  const todo = await Todo.findById(req.params.id);
-
-  if (!todo) {
-    return res.status(404).json({ message: "Todo not found" });
+  try {
+    const todo = await Todo.findById(req.params.id);
+    if (!todo) {
+      return res.status(404).json({ message: "Todo not found" });
+    }
+    res.json(todo);
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({ message: "Invalid Todo ID" });
+    }
+    res.status(500).json({ message: "Server error" });
   }
-
-  res.json(todo);
 };
 
 // CREATE
@@ -31,34 +37,48 @@ const createTodo = async (req, res) => {
 
 // UPDATE
 const updateTodo = async (req, res) => {
-  const todo = await Todo.findById(req.params.id);
+  try {
+    const todo = await Todo.findById(req.params.id);
 
-  if (!todo) {
-    return res.status(404).json({ message: "Todo not found" });
+    if (!todo) {
+      return res.status(404).json({ message: "Todo not found" });
+    }
+
+    const { title, completed } = req.body;
+
+    if (title !== undefined) todo.title = title;
+    if (completed !== undefined) todo.completed = completed;
+
+    const updated = await todo.save();
+    res.json(updated);
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({ message: "Invalid Todo ID" });
+    }
+    res.status(500).json({ message: "Server error" });
   }
-
-  const { title, completed } = req.body;
-
-  if (title !== undefined) todo.title = title;
-  if (completed !== undefined) todo.completed = completed;
-
-  const updated = await todo.save();
-  res.json(updated);
 };
 
 // DELETE
 const deleteTodo = async (req, res) => {
-  const todo = await Todo.findById(req.params.id);
+  try {
+    const todo = await Todo.findById(req.params.id);
 
-  if (!todo) {
-    return res.status(404).json({ message: "Todo not found" });
+    if (!todo) {
+      return res.status(404).json({ message: "Todo not found" });
+    }
+
+    await todo.deleteOne();
+    res.json({ message: "Deleted successfully" });
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({ message: "Invalid Todo ID" });
+    }
+    res.status(500).json({ message: "Server error" });
   }
-
-  await todo.deleteOne();
-  res.json({ message: "Deleted successfully" });
 };
 
-module.exports = {
+export {
   getTodos,
   getTodoById,
   createTodo,
